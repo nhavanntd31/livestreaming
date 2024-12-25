@@ -1,6 +1,4 @@
-# FullStack Twitch Clone: Next.js 14, Livestreaming, React, Prisma, Stripe, Tailwind, MySQL & TypeScript
-
-Credits: [Antonio Erdeljac](https://github.com/AntonioErdeljac)
+NextJS Template BoilerPlate: [Antonio Erdeljac](https://github.com/AntonioErdeljac)
 
 Key Features:
 
@@ -9,6 +7,8 @@ Key Features:
 - 🔗 Connecting Next.js app to OBS
 - 🔐 Authentication
 - 📸 Thumbnail upload with Uploadthing
+- 📡 Face detection and filter with Banuba
+- 🎤 Voice control
 - 👀 Live viewer count
 - 🚦 Live statuses
 - 💬 Real-time chat using sockets
@@ -31,7 +31,6 @@ Key Features:
 - ⚡ Blazing fast application
 - 📄 SSR (Server-Side Rendering)
 - 🗺️ Grouped routes & layouts
-- 🗃️ MySQL DB with PlanetScale
 
 ### Prerequisites
 
@@ -40,7 +39,7 @@ Key Features:
 ### Cloning the Repository
 
 ```shell
-git clone https://github.com/nayak-nirmalya/twitch-clone.git
+git clone https://github.com/nhavanntd31/livestreaming
 ```
 
 ### Install Packages
@@ -52,23 +51,22 @@ npm i
 ### Setup .env File
 
 ```js
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=
-CLERK_SECRET_KEY=
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY={clerk-api-key}
+CLERK_SECRET_KEY={clerk-secret-key}
 NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
 NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
 NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL=/
 NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=/
-CLERK_WEBHOOK_SECRET=
+CLERK_WEBHOOK_SECRET={clerk-webhook-secret}
 
-DATABASE_URL=
+DATABASE_URL={database-url}
 
-LIVEKIT_API_URL=
-LIVEKIT_API_KEY=
-LIVEKIT_API_SECRET=
-NEXT_PUBLIC_LIVEKIT_WS_URL=
+LIVEKIT_API_URL={livekit-api-url}
+LIVEKIT_API_KEY={livekit-api-key}
+LIVEKIT_API_SECRET={livekit-api-secret}
+NEXT_PUBLIC_LIVEKIT_WS_URL={livekit-ws-url}
+NEXT_PUBLIC_BANUBA_CLIENT_TOKEN={banuba-client-token}
 
-UPLOADTHING_SECRET=
-UPLOADTHING_APP_ID=
 ```
 
 ### Setup Prisma
