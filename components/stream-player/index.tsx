@@ -64,10 +64,6 @@ export function StreamPlayer({
     return <StreamPlayerSkeleton />;
   }
 
-  const onCreateStream = async (roomName: string) => {
-    
-  };
-
   return (
     <>
       {collapsed && (
@@ -84,7 +80,7 @@ export function StreamPlayer({
         )}
       >
         <div className="space-y-4 col-span-1 lg:col-span-2 xl:col-span-2 2xl:col-span-5 lg:overflow-y-auto hidden-scrollbar pb-10">
-          <Video hostName={user.username} hostIdentity={user.id} onCreateStream={onCreateStream} isHosted={isHosted} />
+          <Video hostName={user.username} hostIdentity={user.id} isHosted={isHosted} />
           <Header
             imageUrl={user.imageUrl}
             hostName={user.username}
