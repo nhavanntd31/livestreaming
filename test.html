@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LiveKit Livestream</title>
+  <script src="https://cdn.jsdelivr.net/npm/@livekit/client@1.0.0/dist/livekit-client.min.js"></script>
+  <style>
+    #video-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      background-color: #f4f4f4;
+    }
+    video {
+      width: 80%;
+      max-width: 640px;
+      border: 2px solid #333;
+      border-radius: 8px;
+    }
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div id="video-container">
+    <video id="local-video" autoplay muted playsinline></video>
+    <button id="start-stream">Start Streaming</button>
+  </div>
+
+  <script>
+
+    const startStreamButton = document.getElementById('start-stream');
+    const localVideo = document.getElementById('local-video');
+    const serverUrl = "wss://streamming-0uy8c6r5.livekit.cloud";
+    const token = "APIH8tub34KSM4p";
+
+    let room;
+
+    async function startStreaming() {
+      try {
+        // Connect to LiveKit
+        room = await LiveKit.connect(serverUrl, token);
+
+        // Request camera and microphone access
+        const localTracks = await LiveKit.createLocalTracks({
+          audio: true,
+          video: true,
+        });
+
+        // Attach the video track to the local video element
+        const videoTrack = localTracks.find(track => track.kind === 'video');
+        if (videoTrack) {
+          videoTrack.attach(localVideo);
+        }
+
+        // Publish tracks to the room
+        await room.localParticipant.publishTracks(localTracks);
+
+        console.log('Streaming started');
+
+      } catch (error) {
+        console.error('Error starting stream:', error);
+      }
+    }
+
+    startStreamButton.addEventListener('click', startStreaming);
+  </script>
+</body>
+</html>
