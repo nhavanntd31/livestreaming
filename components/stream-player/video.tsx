@@ -38,18 +38,22 @@ export function Video({
 }) {
   const connectionState = useConnectionState();
   const mediaStream = useRef<MediaStream | null>(null);
+  const audioStream = useRef<MediaStream | null>(null);
   const participant = useRemoteParticipant(hostIdentity);
   const localParticipant = useLocalParticipant();
   const [content, setContent] = useState<React.ReactNode | null>(null);
-  const [audioPublicationInstance, setAudioPublicationInstance] = useState<
-    any | null
-  >(null);
-  console.log(localParticipant.localParticipant.identity)
+  const [audioPublicationInstance, setAudioPublicationInstance] = useState<any | null>(null);
+  const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
+
   const tracks = useTracks([
     Track.Source.Camera,
     Track.Source.Microphone,
   ]).filter((track) => track.participant.identity === hostIdentity);
-  console.log(tracks)
+  const localTracks = useTracks([
+    Track.Source.Camera,
+    Track.Source.Microphone,
+  ]).filter((track) => track.participant.identity === localParticipant.localParticipant.identity);
+  console.log(localTracks)
 
   const onCreateStream = async (roomName: string) => {
     setContent(
@@ -66,65 +70,74 @@ export function Video({
   };
   const createTracks = async () => {
     if (mediaStream.current) return;
-    const canvas = document.querySelector(
-      "#webar-app canvas"
-    ) as HTMLCanvasElement;
-    console.log("canvas", canvas);
+    
+    const canvas = document.querySelector("#webar-app canvas") as HTMLCanvasElement;
     if (!canvas) return;
 
+    audioStream.current = await navigator.mediaDevices.getUserMedia({ audio: true });
+    const audioTrack = audioStream.current.getAudioTracks()[0];
+    
     mediaStream.current = canvas.captureStream(30);
     const publishTrack = mediaStream.current.getVideoTracks()[0];
-    const audioTrack = await createLocalAudioTrack({
-      echoCancellation: true,
-      noiseSuppression: true,
+
+    const audioPublication = await localParticipant.localParticipant.publishTrack(audioTrack, {
+      source: Track.Source.Microphone,
     });
-    const videoPublication =
-      await localParticipant.localParticipant.publishTrack(publishTrack, {
-        source: Track.Source.Camera,
-      });
-    const audioPublication =
-      await localParticipant.localParticipant.publishTrack(audioTrack);
-    setAudioPublicationInstance(audioTrack);
+    
+    const videoPublication = await localParticipant.localParticipant.publishTrack(publishTrack, {
+      source: Track.Source.Camera,
+    });
+
   };
 
   const applyAudioEffect = async (effect: DataVoiceParams) => {
-    await localParticipant.localParticipant.unpublishTrack(
-      audioPublicationInstance
-    );
+    if (!audioPublicationInstance || !audioContext || !audioStream.current) return;
 
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    const audioContext = new AudioContext();
-    const source = audioContext.createMediaStreamSource(stream);
+    await localParticipant.localParticipant.unpublishTrack(audioPublicationInstance);
 
-    const biquadFilter = audioContext.createBiquadFilter();
+    const audioTrack = audioStream.current.getAudioTracks()[0];
+    const source = audioContext.createMediaStreamSource(new MediaStream([audioTrack]));
+
+    const oscillatorNode = audioContext.createOscillator();
+    oscillatorNode.type = 'sawtooth';
+    oscillatorNode.frequency.value = 440;
+    oscillatorNode.start();
+
+    const distortionNode = audioContext.createWaveShaper();
+    const distortionAmount = 400;
+    const samples = new Float32Array(44100);
+    for (let i = 0; i < 44100; i++) {
+      samples[i] = (3 + distortionAmount) * i / 44100 - (1 + distortionAmount);
+    }
+    distortionNode.curve = samples;
+
+    const pitchNode = audioContext.createBiquadFilter();
+    pitchNode.type = "lowshelf"; 
+    pitchNode.frequency.value = effect.pitch * 200;
+    pitchNode.gain.value = 25;
+
+    const delayNode = audioContext.createDelay();
+    delayNode.delayTime.value = effect.delay;
+
     const gainNode = audioContext.createGain();
+    gainNode.gain.value = 0.5;
 
-    biquadFilter.type = "bandpass";
-    biquadFilter.frequency.setValueAtTime(1000, audioContext.currentTime);
+    source.connect(distortionNode);
+    distortionNode.connect(pitchNode);
+    oscillatorNode.connect(pitchNode);
+    pitchNode.connect(delayNode);
+    delayNode.connect(gainNode);
 
-    source.connect(biquadFilter);
-    biquadFilter.connect(gainNode);
+    const destination = audioContext.createMediaStreamDestination();
+    gainNode.connect(destination);
 
-    const destination1 = audioContext.createMediaStreamDestination();
-    gainNode.connect(destination1);
+    const processedTrack = destination.stream.getAudioTracks()[0];
 
-    const destination2 = audioContext.createMediaStreamDestination();
-    gainNode.connect(destination2);
+    const audioPublication = await localParticipant.localParticipant.publishTrack(processedTrack, {
+      source: Track.Source.Microphone,
+    });
 
-    const destination3 = audioContext.createMediaStreamDestination();
-    gainNode.connect(destination3);
-
-    const [processedTrack] = destination1.stream
-      .getAudioTracks()
-      .concat(
-        destination2.stream.getAudioTracks(),
-        destination3.stream.getAudioTracks()
-      );
-
-    const audioPublication =
-      await localParticipant.localParticipant.publishTrack(processedTrack, {
-        source: Track.Source.Microphone,
-      });
+    setAudioPublicationInstance(processedTrack);
   };
 
   useEffect(() => {
