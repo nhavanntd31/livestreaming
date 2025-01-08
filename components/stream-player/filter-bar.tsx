@@ -136,9 +136,8 @@ const FilterBar = ({ applyEffect, applyEffectWithParams, applyVoiceEffectWithPar
                             </div>
                             <div className="flex items-center justify-center gap-2 overflow-x-auto pb-2 mt-2">
                                 {getEffects().length > 1 && getEffects().map((effect: any, index: number) => (
-                                    <Hint label={effect.label || effect.name.replace('.zip', '')} side="bottom" asChild>
+                                    <Hint key={`${effect.name}-${index}`} label={effect.label || effect.name.replace('.zip', '')} side="bottom" asChild>
                                       <Button
-                                          key={`${effect.name}-${index}`}
                                           onClick={() => handleEffectClick(effect)}
                                           className={cn(
                                               "px-3 py-1.5 rounded-full text-sm transition",
