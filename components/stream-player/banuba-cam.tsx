@@ -3,6 +3,7 @@
 import React from "react"
 import { Webcam, Player, Module, Effect, Dom } from "@banuba/webar"
 import FilterBar from "./filter-bar"
+import { AudioEffect } from "./video"
 
 export function BanubaCam({ createTracks, applyAudioEffect }: { createTracks: () => void, applyAudioEffect: (effect: any) => void }) {
   const [player, setPlayer] = React.useState<Player | null>(null)

@@ -28,14 +28,15 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { CreateStreamResponse } from "@/app/libs/controller";
 import { useRouter } from "next/navigation";
+import { AudioEffect } from "@/components/stream-player/video";
 
-
-export function ConnectWebcamStreaming({ onCreateStream }: { onCreateStream: (roomName: string) => void }) {
+export function ConnectWebcamStreaming({ onCreateStream }: { onCreateStream: (roomName: string, effect: AudioEffect) => void }) {
   const router = useRouter();
 
   const closeRef = useRef<ElementRef<"button">>(null);
   const [isPending, startTransition] = useTransition();
   const [roomName, setRoomName] = useState("");
+  const [voiceEffect, setVoiceEffect] = useState<AudioEffect>(AudioEffect.DEFAULT);
 
   return (
     <Dialog>
@@ -55,11 +56,27 @@ export function ConnectWebcamStreaming({ onCreateStream }: { onCreateStream: (ro
         />
         <div className="flex items-center justify-between">
           <Label>Connect Webcam</Label>
-          <Switch />
+          <Switch defaultChecked />
         </div>
         <div className="flex items-center justify-between">
           <Label>Connect Microphone</Label>
-          <Switch />
+          <Switch defaultChecked />
+        </div>
+        <div className="flex flex-col gap-2">
+          <Label>Voice Effect</Label>
+          <Select value={voiceEffect} onValueChange={(value) => setVoiceEffect(value as AudioEffect)}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select voice effect" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={AudioEffect.DEFAULT}>Default</SelectItem> 
+              <SelectItem value={AudioEffect.CHIPMUNK}>Chipmunk</SelectItem>
+              <SelectItem value={AudioEffect.ROBOT}>Robot</SelectItem>
+              <SelectItem value={AudioEffect.GIGACHAD}>Gigachad</SelectItem>
+              <SelectItem value={AudioEffect.TROLL}>Troll</SelectItem>
+              <SelectItem value={AudioEffect.GHOST}>Ghost</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
         <Alert>
           <AlertTriangle className="h-4 w-4" />
@@ -73,7 +90,7 @@ export function ConnectWebcamStreaming({ onCreateStream }: { onCreateStream: (ro
           <DialogClose ref={closeRef} asChild>
             <Button variant="ghost">Cancel</Button>
           </DialogClose>
-          <Button disabled={isPending} onClick={() => onCreateStream(roomName)} variant="primary">
+          <Button disabled={isPending} onClick={() => onCreateStream(roomName, voiceEffect)} variant="primary">
             Generate
           </Button>
         </div>

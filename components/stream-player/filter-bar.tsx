@@ -58,6 +58,7 @@ const FilterBar = ({ applyEffect, applyEffectWithParams, applyVoiceEffectWithPar
             setSliderValue(50);
         }
         if (effect.type === "voice") {
+            console.log("applyVoiceEffectWithParams", dataVoice)
             applyVoiceEffectWithParams(dataVoice)
         } else {
             applyEffect(effect.name)

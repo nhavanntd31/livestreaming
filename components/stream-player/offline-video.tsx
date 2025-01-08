@@ -1,8 +1,9 @@
 import React from "react";
 import { WifiOff } from "lucide-react";
 import { ConnectWebcamStreaming } from "@/app/(dashboard)/u/[username]/keys/_components/connect-webcam";
+import { AudioEffect } from "./video";
 
-export function OfflineVideo({ username, canCreate, onCreateStream }: { username: string, canCreate: boolean, onCreateStream: (roomName: string) => void }) {
+export function OfflineVideo({ username, canCreate, onCreateStream }: { username: string, canCreate: boolean, onCreateStream: (roomName: string, effect: AudioEffect) => void }) {
   
   return (
     <div className="h-full flex flex-col space-y-4 justify-center items-center">
